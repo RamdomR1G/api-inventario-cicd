@@ -1,6 +1,25 @@
+# Dependencias (se reinstalan dentro de la imagen)
 node_modules
 npm-debug.log
+
+# Control de versiones y CI
 .git
 .gitignore
+.github
+
+# Datos y archivos locales
 backups
-inventario.db
+**/*.db
+coverage
+*.log
+
+# Secretos: nunca deben entrar a la imagen
+.env
+*.pem
+
+# Pruebas y archivos que no se usan en produccion
+test
+test-tcp-client.js
+README.md
+Dockerfile
+.dockerignore
