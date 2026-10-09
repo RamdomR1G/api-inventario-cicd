@@ -5,7 +5,23 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --runInBand",
+    "test:coverage": "jest --runInBand --coverage",
     "start": "node src/server.js"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/tcpServer.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "statements": 70,
+        "branches": 70,
+        "functions": 70,
+        "lines": 70
+      }
+    }
   },
   "keywords": [],
   "author": "",

@@ -169,3 +169,107 @@ describe('DELETE /productos/:id', () => {
     expect(res.status).toBe(404);
   });
 });
+
+// =====================================================================
+describe('GET /api/health', () => {
+  test('responde 200 con status ok', async () => {
+    const res = await request(app).get('/api/health');
+    expect(res.status).toBe(200);
+    expect(res.body.statusCode).toBe(200);
+    expect(res.body.data.status).toBe('ok');
+    expect(res.body.data).toHaveProperty('uptime');
+    expect(res.body.data).toHaveProperty('timestamp');
+  });
+});
+
+// =====================================================================
+describe('PUT /categorias/:id', () => {
+  test('actualiza el nombre de la categoría correctamente (200)', async () => {
+    const res = await request(app)
+      .put(`/categorias/${categoriaId}`)
+      .send({ nombre: 'Electronica y Computo' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.id).toBe(categoriaId);
+    expect(res.body.data.nombre).toBe('Electronica y Computo');
+  });
+
+  test('ESCENARIO DE FALLO: usuario no envía "nombre" (400)', async () => {
+    const res = await request(app)
+      .put(`/categorias/${categoriaId}`)
+      .send({});
+
+    expect(res.status).toBe(400);
+    expect(res.body.statusCode).toBe(400);
+  });
+
+  test('ESCENARIO DE FALLO: id de categoría inexistente (404)', async () => {
+    const res = await request(app)
+      .put('/categorias/999999')
+      .send({ nombre: 'No existe' });
+
+    expect(res.status).toBe(404);
+    expect(res.body.statusCode).toBe(404);
+  });
+});
+
+// =====================================================================
+describe('Ruta inexistente', () => {
+  test('ESCENARIO DE FALLO: usuario consulta una ruta que no existe (404)', async () => {
+    const res = await request(app).get('/ruta-que-no-existe');
+    expect(res.status).toBe(404);
+    expect(res.body.statusCode).toBe(404);
+    expect(res.body.data.error).toMatch(/no encontrada/i);
+  });
+});
+
+// =====================================================================
+describe('DELETE /categorias/:id', () => {
+  test('elimina una categoría sin productos asociados (200)', async () => {
+    const creada = await request(app)
+      .post('/categorias')
+      .send({ nombre: 'Temporal' });
+    expect(creada.status).toBe(201);
+
+    const res = await request(app).delete(`/categorias/${creada.body.data.id}`);
+    expect(res.status).toBe(200);
+    expect(res.body.data.mensaje).toMatch(/eliminada/i);
+  });
+
+  test('ESCENARIO DE FALLO: id de categoría inexistente (404)', async () => {
+    const res = await request(app).delete('/categorias/999999');
+    expect(res.status).toBe(404);
+    expect(res.body.statusCode).toBe(404);
+  });
+});
+
+// =====================================================================
+describe('POST /backup', () => {
+  test('genera un archivo de respaldo de la base de datos (200)', async () => {
+    const res = await request(app).post('/backup');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.mensaje).toMatch(/backup/i);
+    expect(res.body.data.archivo).toMatch(/^backup-.*\.db$/);
+
+    // Verificamos que el archivo existe físicamente y lo borramos para no dejar basura
+    const backupPath = path.join(__dirname, '..', 'backups', res.body.data.archivo);
+    expect(fs.existsSync(backupPath)).toBe(true);
+    fs.unlinkSync(backupPath);
+  });
+});
+
+// =====================================================================
+// IMPORTANTE: este bloque debe ser el ÚLTIMO del archivo, porque vacía la base de datos.
+describe('DELETE /reset', () => {
+  test('vacía toda la base de datos (200)', async () => {
+    const res = await request(app).delete('/reset');
+    expect(res.status).toBe(200);
+    expect(res.body.data.mensaje).toMatch(/vaciada/i);
+
+    const productos = await request(app).get('/productos');
+    const categorias = await request(app).get('/categorias');
+    expect(productos.body.data).toEqual([]);
+    expect(categorias.body.data).toEqual([]);
+  });
+});

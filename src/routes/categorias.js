@@ -36,6 +36,27 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PUT /categorias/:id - actualizar nombre
+router.put('/:id', async (req, res) => {
+  try {
+    const { nombre } = req.body;
+    if (!nombre) {
+      return sendResponse(res, 400, { error: 'nombre es obligatorio' });
+    }
+
+    const db = await getDb();
+    const existente = await db.get('SELECT * FROM categorias WHERE id = ?', [req.params.id]);
+    if (!existente) return sendResponse(res, 404, { error: 'Categoría no encontrada' });
+
+    await db.run('UPDATE categorias SET nombre = ? WHERE id = ?', [nombre, req.params.id]);
+
+    const actualizada = await db.get('SELECT * FROM categorias WHERE id = ?', [req.params.id]);
+    sendResponse(res, 200, actualizada);
+  } catch (err) {
+    sendResponse(res, 500, { error: err.message });
+  }
+});
+
 // DELETE /categorias/:id - eliminar
 router.delete('/:id', async (req, res) => {
   try {

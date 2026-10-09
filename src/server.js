@@ -14,6 +14,15 @@ app.get('/', (req, res) => {
   sendResponse(res, 200, { mensaje: 'API de Inventario funcionando' });
 });
 
+// Health check - usado para verificar el despliegue (GET /api/health)
+app.get('/api/health', (req, res) => {
+  sendResponse(res, 200, {
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
 // Montamos las rutas
 app.use('/productos', productosRouter);
 app.use('/categorias', categoriasRouter);
