@@ -176,7 +176,7 @@ describe('GET /api/health', () => {
     const res = await request(app).get('/api/health');
     expect(res.status).toBe(200);
     expect(res.body.statusCode).toBe(200);
-    expect(res.body.data.status).toBe('ok');
+    expect(res.body.data.status).toBe('ok2');
     expect(res.body.data).toHaveProperty('uptime');
     expect(res.body.data).toHaveProperty('timestamp');
   });
