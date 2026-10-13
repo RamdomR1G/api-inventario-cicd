@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
 // Health check - usado para verificar el despliegue (GET /api/health)
 app.get('/api/health', (req, res) => {
   sendResponse(res, 200, {
-    status: 'ok',
+    status: 'ok2',
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
